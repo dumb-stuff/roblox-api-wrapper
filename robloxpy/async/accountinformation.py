@@ -266,7 +266,7 @@ class Phone():
 			"phone": phone,
 			"password": password
 		}
-		response = await __makerequest(session, "DELETE" ,self.__url, cookies=cookie,data=data)
+		response = await __makerequest(session, "POST" ,self.__url +"/delete", cookies=cookie,data=data)
 		if response.status == 401:
 			raise errors.AuthorizationDenied("Authorization has been denied for this request.")
 		if response.status == 403:
@@ -282,4 +282,30 @@ class Phone():
 			raise errors.UnknownError("Unknown error")
 		if response.status == 503:
 			raise errors.FeatureDisabled("Feature Disabled")
+		self.DeletePhoneResponse = await response.json()
 		await session.close()
+	async def ResendOTP(self,countrycode,prefix,phone,password):
+		session = await __sessionmaker()
+		cookie = {
+			'.ROBLOSECURITY': self.__token
+		}
+		data = {
+			"countryCode": countrycode,
+			"prefix": prefix,
+			"phone": phone,
+			"password": password
+		}
+		response = await __makerequest(session, "POST" ,self.__url+"/resend", cookies=cookie,data=data)
+		if response.status == 401:
+			raise errors.AuthorizationDenied("Authorization has been denied for this request.")
+		if response.status == 403:
+			raise errors.TokenValidationFailed("Token validation failed")
+		if response.status == 429:
+			raise errors.Flooded("Flooded")
+		if response.status == 500:
+			raise errors.UnknownError("Unknown error")
+		if response.status == 503:
+			raise errors.FeatureDisabled("Feature Disabled")
+		self.ResendOTPResponse = await response.json()
+		await session.close()
+	

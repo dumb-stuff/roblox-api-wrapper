@@ -121,7 +121,7 @@ class NotConnectedToXboxLive(Exception):
     """
     
 
-class Incorrectword(Exception):
+class IncorrectPassword(Exception):
     """
     When user type wrong word
     """
@@ -135,3 +135,57 @@ class Flooded(Exception):
     """
     Flooded
     """
+
+class InvalidPhoneNumber(Exception):
+    """
+    Invalid Phone Number
+    """
+    pass
+
+class PhoneNumberAlreadyAssocidated(Exception):
+    """
+    Phone Number Already Associdated
+    """
+    pass
+
+class InvalidCode(Exception):
+    """
+    Invalid Code
+    """
+    pass
+
+class RequestEmpty(Exception):
+    """
+    Request Empty
+    """
+    pass
+
+class FacebookURLInvalid(Exception):
+    """
+    Facebook URL Invalid
+    """
+    pass
+
+class TwitterHandleInvalid(Exception):
+    """
+    Twitter Handle Invalid
+    """
+    pass
+
+class YoutubeURLInvalid(Exception):
+    """
+    Youtube URL Invalid
+    """
+    pass
+
+class TwitchURLInvalid(Exception):
+    """
+    Twitch URL Invalid
+    """
+    pass
+
+class AgeTooLow(Exception):
+    """
+    Age Too Low
+    """
+    pass

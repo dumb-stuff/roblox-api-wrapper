@@ -308,4 +308,136 @@ class Phone():
 			raise errors.FeatureDisabled("Feature Disabled")
 		self.ResendOTPResponse = await response.json()
 		await session.close()
-	
+	async def VerifyOTP(self,code):
+		session = await __sessionmaker()
+		cookie = {
+			'.ROBLOSECURITY': self.__token
+		}
+		data = {
+			"code":code
+		}
+		response = await __makerequest(session, "POST" ,self.__url+"/verify", cookies=cookie,data=data)
+		if response.status == 400:
+			if json.loads(await response.text())["error"][0]["code"] == 2:
+				raise errors.InvalidPhoneNumber("Invalid phone number")
+			if json.loads(await response.text())["error"][0]["code"] == 3:
+				raise errors.PhoneNumberAlreadyAssocidated("Phone number already associated with another account")
+			if json.loads(await response.text())["error"][0]["code"] == 7:
+				raise errors.InvalidCode("Invalid code")
+		if response.status == 401:
+			raise errors.AuthorizationDenied("Authorization has been denied for this request.")
+		if response.status == 403:
+			raise errors.TokenValidationFailed("Token validation failed")
+		if response.status == 429:
+			raise errors.Flooded("Flooded")
+		if response.status == 500:
+			raise errors.UnknownError("Unknown error")
+		if response.status == 503:
+			raise errors.FeatureDisabled("Feature Disabled")
+		self.VerifyOTPResponse = await response.json()
+		await session.close()
+	async def GetPhoneNumber(self):
+		session = await __sessionmaker()
+		cookie = {
+			'.ROBLOSECURITY': self.__token
+		}
+		response = await __makerequest(session, "GET" ,self.__url, cookies=cookie)
+		if response.status == 401:
+			raise errors.AuthorizationDenied("Authorization has been denied for this request.")
+		if response.status == 500:
+			raise errors.UnknownError("Unknown error")
+		self.countryCode = await response.json()["countryCode"]
+		self.prefix = await response.json()["prefix"]
+		self.phone = await response.json()["phone"]
+		self.isVerified = await response.json()["isVerified"]
+		self.verificationCodeLength = await response.json()["verificationCodeLength"]
+		await session.close()
+	async def UpdatePhoneNumber(self,countrycode,prefix,phone,password):
+		session = await __sessionmaker()
+		cookie = {
+			'.ROBLOSECURITY': self.__token
+		}
+		data = {
+			"countryCode": countrycode,
+			"prefix": prefix,
+			"phone": phone,
+			"password": password
+		}
+		response = await __makerequest(session, "POST" ,self.__url+"/update", cookies=cookie,data=data)
+		if response.status == 400:
+			if json.loads(await response.text())["error"][0]["code"] == 2:
+				raise errors.InvalidPhoneNumber("Invalid phone number")
+			if json.loads(await response.text())["error"][0]["code"] == 3:
+				raise errors.PhoneNumberAlreadyAssocidated("Phone number already associated with another account")
+		if response.status == 401:
+			raise errors.AuthorizationDenied("Authorization has been denied for this request.")
+		if response.status == 403:
+			if json.loads(await response.text())["error"][0]["code"] == 0:
+				raise errors.TokenValidationFailed("Token validation failed")
+			if json.loads(await response.text())["error"][0]["code"] == 4:
+				raise errors.PinIsLocked("Pin is locked")
+			if json.loads(await response.text())["error"][0]["code"] == 5:
+				raise errors.IncorrectPassword("Incorrect password")
+			
+		if response.status == 429:
+			raise errors.Flooded("Flooded")
+		if response.status == 500:
+			raise errors.UnknownError("Unknown error")
+		if response.status == 503:
+			raise errors.FeatureDisabled("Feature Disabled")
+		self.UpdatePhoneResponse = await response.json()
+		await session.close()
+class Promotion():
+	def __init__(self,token):
+		self.__token = token
+		self.__url = "https://accountinformation.roblox.com/v1/promotion-channels"
+	async def GetUserPromotionChannel(self):
+		session = await __sessionmaker()
+		cookie = {
+			'.ROBLOSECURITY': self.__token
+		}
+		response = await __makerequest(session, "GET" ,self.__url, cookies=cookie)
+		if response.status == 400:
+			raise errors.UserNotFound("User not found")
+		if response.status == 401:
+			raise errors.AuthorizationDenied("Authorization has been denied for this request.")
+		self.promotionChannelsVisibilityPrivacy = await response.json()["promotionChannelsVisibilityPrivacy"]
+		self.facebook = await response.json()["facebook"]
+		self.twitter = await response.json()["twitter"]
+		self.youtube = await response.json()["youtube"]
+		self.twitch = await response.json()["twitch"]
+		await session.close()
+	async def UpdateUserPromotionChannel(self,facebook,twitter,youtube,twitch,promotionChannelsVisibilityPrivacy):
+		session = await __sessionmaker()
+		cookie = {
+			'.ROBLOSECURITY': self.__token
+		}
+		data = {
+			"facebook": facebook,
+			"twitter": twitter,
+			"youtube": youtube,
+			"twitch": twitch,
+			"promotionChannelsVisibilityPrivacy": promotionChannelsVisibilityPrivacy
+		}
+		response = await __makerequest(session, "POST" ,self.__url+"/update", cookies=cookie,data=data)
+		if response.status == 400:
+			if json.loads(await response.text())["error"][0]["code"] == 2:
+				raise errors.RequestEmpty("Request is empty")
+			if json.loads(await response.text())["error"][0]["code"] == 11:
+				raise errors.FacebookURLInvalid("Facebook URL is invalid")
+			if json.loads(await response.text())["error"][0]["code"] == 12:
+				raise errors.TwitterHandleInvalid("Twitter URL is invalid")
+			if json.loads(await response.text())["error"][0]["code"] == 13:
+				raise errors.YoutubeURLInvalid("Youtube URL is invalid")
+			if json.loads(await response.text())["error"][0]["code"] == 14:
+				raise errors.TwitchURLInvalid("Twitch URL is invalid")
+		if response.status == 401:
+			raise errors.AuthorizationDenied("Authorization has been denied for this request.")
+		if response.status == 403:
+			if json.loads(await response.text())["error"][0]["code"] == 0:
+				raise errors.TokenValidationFailed("Token validation failed")
+			if json.loads(await response.text())["error"][0]["code"] == 3:
+				raise errors.PinIsLocked("Pin is locked")
+			if json.loads(await response.text())["error"][0]["code"] == 4:
+				raise errors.AgeTooLow("Only users who are over twelve years of age may edit social network channels.")
+		self.result = await response.json()		
